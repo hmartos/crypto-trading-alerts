@@ -1,0 +1,24 @@
+{
+  "name": "crypto-alerts",
+  "version": "1.0.0",
+  "description": "System to generate alerts for cryptocurrency trading pairs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [
+    "crypto",
+    "cryptocurrency",
+    "trading",
+    "alerts",
+    "indicators"
+  ],
+  "author": "hmartos <hectormartosg@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.27.2",
+    "dotenv": "^16.0.3",
+    "nodemailer": "^6.7.8",
+    "trading-indicator": "^1.0.8"
+  }
+}
