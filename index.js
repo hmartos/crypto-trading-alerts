@@ -10,7 +10,7 @@ const EXCHANGE = "binance";
 
 const {SENDER_EMAIL_ADDRESS, SENDER_EMAIL_PASSWORD, RECEIVER_EMAIL_ADDRESS} = process.env;
 if (!SENDER_EMAIL_ADDRESS || !SENDER_EMAIL_PASSWORD) {
-  console.warn("No configuration found for sending emails")
+  console.warn("No email sender configuration found!")
 }
 if (!RECEIVER_EMAIL_ADDRESS) {
   console.warn("No email recipients configuration found!")
@@ -59,7 +59,7 @@ const main = async () => {
  * Get OverSold/OverBougth RSI check
  * @returns 
  */
-const getRSIOverSoldOverBoughtCheck = async (tradingPair, OverBoughtThreshold = 70,  overSoldThreshold = 40 ) => {
+const getRSIOverSoldOverBoughtCheck = async (tradingPair, OverBoughtThreshold = 70,  overSoldThreshold = 30 ) => {
   try {
     const rsiCheck = await tradingIndicators.rsiCheck(14, OverBoughtThreshold, overSoldThreshold, EXCHANGE, tradingPair, '1d', false);
     return {tradingPair, ...rsiCheck};
@@ -75,6 +75,10 @@ const getRSIOverSoldOverBoughtCheck = async (tradingPair, OverBoughtThreshold = 
  */
 const sendOverSoldAlertByEmail = async (tradingPairs, exchange) => {
   try {
+    if (!SENDER_EMAIL_ADDRESS || !SENDER_EMAIL_PASSWORD || !RECEIVER_EMAIL_ADDRESS) {
+      console.log("Incomplete email configuration, will not send email. Review your configuration!")
+      return;
+    }
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
