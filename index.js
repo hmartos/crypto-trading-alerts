@@ -99,20 +99,8 @@ const sendOverSoldAlertByEmail = async (tradingPairs, exchange) => {
           <tbody>
             ${tradingPairs.map((tradingPair) => {
               return `<tr>
-                <td>${tradingPair.tradingPair}</td>
+                <td><a href="https://next-ios-deeplink.vercel.app/api/ios-deeplink?pair=${tradingPair.tradingPair}">${tradingPair.tradingPair}</a></td>
                 <td>${tradingPair.rsiVal}</td>
-                <td><a href="ios-app://1436799971/binance/app.binance.com/trade/trade?at=spot&symbol=veteur" target="ios-app://1436799971/binance/app.binance.com/trade/trade?at=spot&symbol=veteur">Link</a></td>
-                <td>
-                  <div itemscope itemtype="http://schema.org/EmailMessage">
-                    <meta itemprop="name" content="Watch movie"/>
-                    ... information about the movie ...
-                    <div itemprop="potentialAction" itemscope itemtype="http://schema.org/ViewAction">
-                      <meta itemprop="target" content="https://watch-movies.com/watch?movieId=abc123"/>
-                      <meta itemprop="target" content="android-app://com.watchmovies.android/http/watch-movies.com/watch?movieId=abc123"/>
-                      <meta itemprop="target" content="ios://1436799971/binance/app.binance.com/trade/trade?at=spot&symbol=veteur"/>
-                    </div>
-                  </div>
-                </td>
               </tr>`
             }).join('')}
           </tbody>
@@ -157,15 +145,6 @@ const getTradingSymbols = async () => {
   } catch (error) {
     console.error("Error getting trading symbols", error)
   }
-}
-
-/**
- * Capitalize string
- * @param {*} string 
- * @returns 
- */
-const capitalize = (string) => {
-  return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
 main();
