@@ -973,6 +973,4 @@ const getTradingSymbols = async () => {
   }
 }
 
-//main();
-
-sendOverSoldAlertByEmail([{tradingPair: "ETHEUR", rsiVal: 24.4}, {tradingPair: "NEAREUR", rsiVal: 28.8}])
+main();
