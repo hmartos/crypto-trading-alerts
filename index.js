@@ -20,6 +20,7 @@ if (!RECEIVER_EMAIL_ADDRESS) {
 // Main
 const main = async () => {
   try {
+    console.log(`Running alert strategies on ${new Date().toString()}`);
     const overSoldPairs = [];
     console.log("Getting symbols for trading...");
     const tradingSymbols = await getTradingSymbols();
@@ -46,8 +47,10 @@ const main = async () => {
 
     console.log(`There are ${overSoldPairs.length} overSold trading pairs`, overSoldPairs)
     if (overSoldPairs.length > 0) {
+      console.log("Sending overSold alerts by email")
       sendOverSoldAlertByEmail(overSoldPairs, EXCHANGE);
     }
+    console.log(`Finished alert strategies on ${new Date().toString()}`);
    
   } catch (error) {
     console.error("Error generating cyrptocurrency trading alerts", error);
@@ -120,7 +123,7 @@ const sendOverSoldAlertByEmail = async (tradingPairs, exchange) => {
     // send mail with defined transport object
     let info = await transporter.sendMail(mailOptions);
 
-    console.log("Message sent", info, template);
+    console.log("Alerts sent", info, template);
   } catch (error) {
     console.error("Error sending OverSold email alert", error)
   }
