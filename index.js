@@ -7,6 +7,8 @@ dotenv.config();
 
 // Constants
 const EXCHANGE = "binance";
+const OVERBOUGHT_THRESHOLD = 75;
+const OVERSOLD_THRESHOLD = 25;
 
 const {SENDER_EMAIL_ADDRESS, SENDER_EMAIL_PASSWORD, RECEIVER_EMAIL_ADDRESS} = process.env;
 if (!SENDER_EMAIL_ADDRESS || !SENDER_EMAIL_PASSWORD) {
@@ -62,7 +64,7 @@ const main = async () => {
  * Get OverSold/OverBougth RSI check
  * @returns 
  */
-const getRSIOverSoldOverBoughtCheck = async (tradingPair, OverBoughtThreshold = 70,  overSoldThreshold = 30 ) => {
+const getRSIOverSoldOverBoughtCheck = async (tradingPair, OverBoughtThreshold = OVERBOUGHT_THRESHOLD, overSoldThreshold = OVERSOLD_THRESHOLD) => {
   try {
     const rsiCheck = await tradingIndicators.rsiCheck(14, OverBoughtThreshold, overSoldThreshold, EXCHANGE, tradingPair, '1d', false);
     return {tradingPair, ...rsiCheck};
