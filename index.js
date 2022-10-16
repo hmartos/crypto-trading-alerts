@@ -12,8 +12,10 @@ const EXCHANGE = 'binance';
 const OVERBOUGHT_THRESHOLD = 75;
 const OVERSOLD_THRESHOLD = 25;
 
-const { SENDER_EMAIL_ADDRESS, SENDER_EMAIL_PASSWORD, RECEIVER_EMAIL_ADDRESS } =
-  process.env;
+// Configuration
+const { SENDER_EMAIL_ADDRESS, SENDER_EMAIL_PASSWORD, RECEIVER_EMAIL_ADDRESS } = process.env;
+
+// Configuration checks
 if (!SENDER_EMAIL_ADDRESS || !SENDER_EMAIL_PASSWORD) {
   console.warn('No email sender configuration found!');
 }
@@ -24,46 +26,38 @@ if (!RECEIVER_EMAIL_ADDRESS) {
 // Main
 const main = async () => {
   try {
+    //const tradingSymbols = symbolStrategies.getEURSQuoteAssetymbols()
+    //const symbolsForAlerts = selectionStrategies.overSoldSymbols(tradingSymbols, OVERSOLD_THRESHOLD)
+    //alertStrategies.sendEmailAlert(symbolsForAlerts, template)
+
+    // Get list of symbols for alerts
     console.log(`Running alert strategies on ${new Date().toString()}`);
     const overSoldPairs = [];
     console.log('Getting symbols for trading...');
     const tradingSymbols = await getTradingSymbols();
-    console.log(
-      `Iterating over ${tradingSymbols.length} trading pairs`,
-      tradingSymbols
-    );
+    console.log(`Iterating over ${tradingSymbols.length} trading pairs`, tradingSymbols);
 
-    // Iterate over all tradingSymbols to see if they are OverSold
+    // Iterate over all tradingSymbols executing the strategy to see if they are selected
+    // to generate alerts (OverSold strategy in this case
     for (let i = 0; i < tradingSymbols.length; i++) {
       try {
         const tradingPair = tradingSymbols[i];
         console.log(`Iterating trading pair '${tradingPair}'`);
         const rsiCheck = await getRSIOverSoldOverBoughtCheck(tradingPair);
         const { overSold, rsiVal } = rsiCheck;
-        console.log(
-          `RSI OverSold/OverBought Check for trading pair '${tradingPair}'`,
-          rsiCheck
-        );
+        console.log(`RSI OverSold/OverBought Check for trading pair '${tradingPair}'`, rsiCheck);
 
         // Select overSold pairs
         if (overSold) {
-          console.log(
-            `OverSold, it may be a good moment to buy ${tradingPair}!`
-          );
+          console.log(`OverSold, it may be a good moment to buy ${tradingPair}!`);
           overSoldPairs.push({ tradingPair, rsiVal });
         }
       } catch (error) {
-        console.error(
-          `Error getting RSI check on trading pair '${tradingPair}'`,
-          error
-        );
+        console.error(`Error getting RSI check on trading pair '${tradingPair}'`, error);
       }
     }
 
-    console.log(
-      `There are ${overSoldPairs.length} overSold trading pairs`,
-      overSoldPairs
-    );
+    console.log(`There are ${overSoldPairs.length} overSold trading pairs`, overSoldPairs);
     if (overSoldPairs.length > 0) {
       console.log('Sending overSold alerts by email');
       sendOverSoldAlertByEmail(overSoldPairs, EXCHANGE);
@@ -107,14 +101,8 @@ const getRSIOverSoldOverBoughtCheck = async (
  */
 const sendOverSoldAlertByEmail = async (tradingPairs, exchange) => {
   try {
-    if (
-      !SENDER_EMAIL_ADDRESS ||
-      !SENDER_EMAIL_PASSWORD ||
-      !RECEIVER_EMAIL_ADDRESS
-    ) {
-      console.log(
-        'Incomplete email configuration, will not send email. Review your configuration!'
-      );
+    if (!SENDER_EMAIL_ADDRESS || !SENDER_EMAIL_PASSWORD || !RECEIVER_EMAIL_ADDRESS) {
+      console.log('Incomplete email configuration, will not send email. Review your configuration!');
       return;
     }
     const transporter = nodemailer.createTransport({
