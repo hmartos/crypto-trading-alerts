@@ -18,7 +18,6 @@ const STATE_ACTIONS = {
 // Configuration
 dotenv.config();
 const { SENDER_EMAIL_ADDRESS, SENDER_EMAIL_PASSWORD, RECEIVER_EMAIL_ADDRESS, PERSISTED_STATE_FILE } = process.env;
-// TODO Load state from persisted file
 const stateFilePath = PERSISTED_STATE_FILE || './state/saved/state.json';
 
 // State
@@ -46,6 +45,7 @@ const main = async () => {
     if (persistedState) {
       state = JSON.parse(JSON.stringify(persistedState));
     } else {
+      // Initialize state
       state = {
         minRSI: {},
         lastUpdated: new Date().toISOString(),
@@ -91,10 +91,10 @@ const main = async () => {
     console.log(`There are ${overSoldPairs.length} overSold trading pairs`, overSoldPairs);
     if (overSoldPairs.length > 0) {
       console.log('Sending overSold alerts by email');
-      sendOverSoldAlertByEmail(overSoldPairs, EXCHANGE);
+      sendOverSoldAlertByEmail(overSoldPairs);
     }
     console.log(`Finished alert strategies on ${new Date().toString()}`);
-    //TODO Persist state
+    // Persist state
     persistState();
   } catch (error) {
     console.error('Error generating cyrptocurrency trading alerts', error);
@@ -130,9 +130,8 @@ const getRSIOverSoldOverBoughtCheck = async (
 /**
  * Send OverSold alert by email
  * @param {*} tradingPairs
- * @param {*} exchange
  */
-const sendOverSoldAlertByEmail = async (tradingPairs, exchange) => {
+const sendOverSoldAlertByEmail = async tradingPairs => {
   try {
     if (!SENDER_EMAIL_ADDRESS || !SENDER_EMAIL_PASSWORD || !RECEIVER_EMAIL_ADDRESS) {
       console.log('Incomplete email configuration, will not send email. Review your configuration!');
