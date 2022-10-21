@@ -83,7 +83,6 @@ const main = async () => {
           lastUpdated: new Date().toISOString(),
           lastUpdateAction: STATE_ACTIONS.UPDATE_MIN_RSI,
         };
-        console.log('State', state);
       } catch (error) {
         console.error(`Error getting RSI check`, error);
       }
@@ -228,35 +227,29 @@ const loadPersistedState = async () => {
  * @param {*} rsiValue
  */
 const updateMinRSI = (tradingPair, rsiValue) => {
-  console.log(`Update Min RSI for tradingPair ${tradingPair} - RSI(14): ${rsiValue}. State before: `, state);
-  const newMinRSI = JSON.parse(JSON.stringify(state.minRSI));
-  console.log('newMinRSI', newMinRSI);
+  console.log(`Update Min RSI for tradingPair ${tradingPair} - RSI(14): ${rsiValue}`);
+  const minRSI = JSON.parse(JSON.stringify(state.minRSI));
+  const timestamp = new Date().toISOString();
+  const NEW_MIN_RSI = {
+    minRSIValue: rsiValue,
+    minRSIValueTimestamp: timestamp,
+    lastRSIValue: rsiValue,
+    lastRSIValueTimestamp: timestamp,
+  };
 
   const existingTradingPair = state.minRSI[tradingPair];
   console.log('existingTradingPair', existingTradingPair);
   if (existingTradingPair) {
     if (rsiValue < existingTradingPair.minRSIValue) {
-      const timestamp = new Date().toISOString();
-      newMinRSI[tradingPair].minRSIValue = rsiValue;
-      newMinRSI[tradingPair].minRSIValueTimestamp = timestamp;
-      newMinRSI[tradingPair].lastRSIValue = rsiValue;
-      newMinRSI[tradingPair].lastRSIValueTimestamp = timestamp;
+      minRSI[tradingPair] = { ...NEW_MIN_RSI };
     } else {
-      newMinRSI[tradingPair].lastRSIValue = rsiValue;
-      newMinRSI[tradingPair].lastRSIValueTimestamp = new Date().toISOString();
+      minRSI[tradingPair] = { ...minRSI[tradingPair], lastRSIValue: rsiValue, lastRSIValueTimestamp: timestamp };
     }
   } else {
-    console.log(`No registrered min RSI for trading pair ${tradingPair} - RSI(14): ${rsiValue}`);
-    const timestamp = new Date().toISOString();
-    newMinRSI[tradingPair] = {
-      minRSIValue: rsiValue,
-      minRSIValueTimestamp: timestamp,
-      lastRSIValue: rsiValue,
-      lastRSIValueTimestamp: timestamp,
-    };
+    console.log(`No registered min RSI for trading pair ${tradingPair} - RSI(14): ${rsiValue}`);
+    minRSI[tradingPair] = { ...NEW_MIN_RSI };
   }
-  console.log('newMinRSI', newMinRSI);
-  return newMinRSI;
+  return minRSI;
 };
 
 main();
