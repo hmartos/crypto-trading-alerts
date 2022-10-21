@@ -235,18 +235,25 @@ const updateMinRSI = (tradingPair, rsiValue) => {
   const existingTradingPair = state.minRSI[tradingPair];
   console.log('existingTradingPair', existingTradingPair);
   if (existingTradingPair) {
-    if (rsiValue < existingTradingPair.rsiValue) {
+    if (rsiValue < existingTradingPair.minRSIValue) {
+      const timestamp = new Date().toISOString();
       newMinRSI[tradingPair].minRSIValue = rsiValue;
-      newMinRSI[tradingPair].minRSIValueTimestamp = new Date().toISOString();
+      newMinRSI[tradingPair].minRSIValueTimestamp = timestamp;
       newMinRSI[tradingPair].lastRSIValue = rsiValue;
-      newMinRSI[tradingPair].lastRSIValueTimestamp = new Date().toISOString();
+      newMinRSI[tradingPair].lastRSIValueTimestamp = timestamp;
     } else {
       newMinRSI[tradingPair].lastRSIValue = rsiValue;
       newMinRSI[tradingPair].lastRSIValueTimestamp = new Date().toISOString();
     }
   } else {
     console.log(`No registrered min RSI for trading pair ${tradingPair} - RSI(14): ${rsiValue}`);
-    newMinRSI[tradingPair] = { lastRSIValue: rsiValue, lastRSIValueTimestamp: new Date().toISOString() };
+    const timestamp = new Date().toISOString();
+    newMinRSI[tradingPair] = {
+      minRSIValue: rsiValue,
+      minRSIValueTimestamp: timestamp,
+      lastRSIValue: rsiValue,
+      lastRSIValueTimestamp: timestamp,
+    };
   }
   console.log('newMinRSI', newMinRSI);
   return newMinRSI;
