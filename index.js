@@ -2,23 +2,19 @@ const tradingIndicators = require('trading-indicator');
 const nodemailer = require('nodemailer');
 const axios = require('axios');
 const dotenv = require('dotenv');
-const fs = require('fs').promises;
 
+dotenv.config();
+
+const { STATE_ACTIONS, initializeState, updateState, persistState } = require('./state/state.js');
 const { createEmailTemplate } = require('./email-template');
 
 // Constants
 const EXCHANGE = 'binance';
 const OVERBOUGHT_THRESHOLD = 75;
 const OVERSOLD_THRESHOLD = 25;
-const STATE_ACTIONS = {
-  INITIALIZE_STATE: 'INITIALIZE_STATE',
-  UPDATE_MIN_RSI: 'UPDATE_MIN_RSI',
-};
 
 // Configuration
-dotenv.config();
-const { SENDER_EMAIL_ADDRESS, SENDER_EMAIL_PASSWORD, RECEIVER_EMAIL_ADDRESS, PERSISTED_STATE_FILE } = process.env;
-const stateFilePath = PERSISTED_STATE_FILE || './state/saved/state.json';
+const { SENDER_EMAIL_ADDRESS, SENDER_EMAIL_PASSWORD, RECEIVER_EMAIL_ADDRESS } = process.env;
 
 // State
 let state;
@@ -35,23 +31,13 @@ if (!RECEIVER_EMAIL_ADDRESS) {
 // Main
 const main = async () => {
   try {
-    //loadState()
+    //initializeState()
     //const tradingSymbols = symbolStrategies.getEURSQuoteAssetymbols()
     //const symbolsForAlerts = selectionStrategies.overSoldSymbols(tradingSymbols, OVERSOLD_THRESHOLD)
     //alertStrategies.sendEmailAlert(symbolsForAlerts, template)
 
-    // Load state
-    const persistedState = await loadPersistedState();
-    if (persistedState) {
-      state = JSON.parse(JSON.stringify(persistedState));
-    } else {
-      // Initialize state
-      state = {
-        minRSI: {},
-        lastUpdated: new Date().toISOString(),
-        lastUpdateAction: STATE_ACTIONS.INITIALIZE_STATE,
-      };
-    }
+    // Initialize state
+    state = await initializeState();
 
     // Get list of symbols for alerts
     console.log(`Running alert strategies on ${new Date().toString()}`);
@@ -76,13 +62,7 @@ const main = async () => {
           overSoldPairs.push({ tradingPair, rsiVal });
         }
 
-        // TODO Extract to a function updateState(action: STATE_ACTIONS, tradingPair, rsiVal)
-        state = {
-          ...state,
-          minRSI: updateMinRSI(tradingPair, rsiVal),
-          lastUpdated: new Date().toISOString(),
-          lastUpdateAction: STATE_ACTIONS.UPDATE_MIN_RSI,
-        };
+        state = updateState(state, STATE_ACTIONS.UPDATE_MIN_RSI, { tradingPair, rsiVal });
       } catch (error) {
         console.error(`Error getting RSI check`, error);
       }
@@ -95,7 +75,7 @@ const main = async () => {
     }
     console.log(`Finished alert strategies on ${new Date().toString()}`);
     // Persist state
-    persistState();
+    persistState(state);
   } catch (error) {
     console.error('Error generating cyrptocurrency trading alerts', error);
   }
@@ -190,65 +170,6 @@ const getTradingSymbols = async () => {
   } catch (error) {
     console.error('Error getting trading symbols', error);
   }
-};
-
-// STATE
-/**
- * Persist state to a file
- */
-const persistState = async () => {
-  try {
-    await fs.writeFile(stateFilePath, JSON.stringify(state, null, 2), 'utf8');
-  } catch (error) {
-    console.error('Error persisting state to file', error);
-  }
-};
-
-/**
- * Load persisted state from file
- * @returns
- */
-const loadPersistedState = async () => {
-  try {
-    const state = await fs.readFile(stateFilePath, 'utf8');
-    if (state) {
-      return JSON.parse(state);
-    }
-    return false;
-  } catch (error) {
-    console.error('Error loaading state from file', error);
-  }
-};
-
-/**
- * Update minimum RSI value for a trading pair in a moment in time
- * @param {*} pair
- * @param {*} rsiValue
- */
-const updateMinRSI = (tradingPair, rsiValue) => {
-  console.log(`Update Min RSI for tradingPair ${tradingPair} - RSI(14): ${rsiValue}`);
-  const minRSI = JSON.parse(JSON.stringify(state.minRSI));
-  const timestamp = new Date().toISOString();
-  const NEW_MIN_RSI = {
-    minRSIValue: rsiValue,
-    minRSIValueTimestamp: timestamp,
-    lastRSIValue: rsiValue,
-    lastRSIValueTimestamp: timestamp,
-  };
-
-  const existingTradingPair = state.minRSI[tradingPair];
-  console.log('existingTradingPair', existingTradingPair);
-  if (existingTradingPair) {
-    if (rsiValue < existingTradingPair.minRSIValue) {
-      minRSI[tradingPair] = { ...NEW_MIN_RSI };
-    } else {
-      minRSI[tradingPair] = { ...minRSI[tradingPair], lastRSIValue: rsiValue, lastRSIValueTimestamp: timestamp };
-    }
-  } else {
-    console.log(`No registered min RSI for trading pair ${tradingPair} - RSI(14): ${rsiValue}`);
-    minRSI[tradingPair] = { ...NEW_MIN_RSI };
-  }
-  return minRSI;
 };
 
 main();
