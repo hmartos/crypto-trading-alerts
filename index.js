@@ -31,11 +31,6 @@ if (!RECEIVER_EMAIL_ADDRESS) {
 // Main
 const main = async () => {
   try {
-    //initializeState()
-    //const tradingSymbols = symbolStrategies.getEURSQuoteAssetymbols()
-    //const symbolsForAlerts = selectionStrategies.overSoldSymbols(tradingSymbols, OVERSOLD_THRESHOLD)
-    //alertStrategies.sendEmailAlert(symbolsForAlerts, template)
-
     // Initialize state
     state = await initializeState();
 
@@ -75,6 +70,7 @@ const main = async () => {
     }
     console.log(`Finished alert strategies on ${new Date().toString()}`);
     // Persist state
+    console.log('Persisting state...');
     persistState(state);
   } catch (error) {
     console.error('Error generating cyrptocurrency trading alerts', error);
@@ -161,7 +157,7 @@ const getTradingSymbols = async () => {
 
     const normalizedSymbols = symbols
       .filter(symbol => {
-        return symbol.status === 'TRADING' && symbol.quoteAsset === 'EUR'; //|| symbol.quoteAsset === "ETH")
+        return symbol.status === 'TRADING' && symbol.quoteAsset === 'ETH'; //|| symbol.quoteAsset === "EUR")
       })
       .map(symbol => {
         return symbol.symbol;

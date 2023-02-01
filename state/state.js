@@ -8,6 +8,10 @@ const STATE_ACTIONS = {
   UPDATE_MIN_RSI: 'UPDATE_MIN_RSI',
 };
 
+/**
+ * Initialize state
+ * @returns
+ */
 const initializeState = async () => {
   let state;
   console.log(`Initializing state...`);
@@ -60,6 +64,7 @@ const updateState = (oldState, action, data) => {
 const persistState = async state => {
   try {
     await fs.writeFile(stateFilePath, JSON.stringify(state, null, 2), 'utf8');
+    console.log('State persisted successfully!');
   } catch (error) {
     console.error('Error persisting state to file', error);
   }
